@@ -27,38 +27,41 @@ fs.promises
 function processFiles(files) {
   files.forEach((file) => {
     if (isVideoFile(file)) {
-      console.log(`${file} is a video file`);
+      moveFile(file, videoDir);
     } else if (isCapturedFile(file)) {
-      console.log(`${file} is a captured file`);
+      moveFile(file, capturedDir);
     } else if (isDuplicatedFile(file)) {
-      console.log(`${file} is a duplicated file`);
+      moveFile(file, duplicatedDir);
     }
   });
 }
 
 function isVideoFile(file) {
-  const extension = path.extname(file);
-  if (extension === '.mp4' || extension === '.mov') {
-    return true;
-  } else {
-    false;
-  }
+  const regExp = /(mp4|mov)$/gm;
+  const match = file.match(regExp);
+  return !!match;
 }
+
 function isCapturedFile(file) {
-  const extension = path.extname(file);
-  if (extension === '.aae' || extension === '.png') {
-    return true;
-  } else {
-    false;
-  }
+  const regExp = /(aae|png)$/gm;
+  const match = file.match(regExp);
+  return !!match;
 }
+
 function isDuplicatedFile(file) {
   const extension = path.extname(file);
-  const split = path.basename(file).split('_');
-  const result = split[1];
-  if (extension === '.jpg' && result[0] !== 'E') {
+  const split = path.basename(file).split('_')[1];
+  if (extension === '.jpg' && !split.startsWith('E')) {
     return true;
   } else {
-    false;
+    return false;
   }
+}
+
+function moveFile(file, dir) {
+  const oldPath = path.join(workingDir, file);
+  const newPath = path.join(dir, file);
+  fs.promises
+    .rename(oldPath, newPath) //
+    .catch(console.error);
 }
